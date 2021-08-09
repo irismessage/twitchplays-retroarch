@@ -15,6 +15,11 @@ import twitchio.ext.commands
 # todo: sync command set with RetroArch config files
 # todo: write readme with guide
 # todo: setup.py, pypi upload
+# todo: arguments like config location
+# todo: exe builder (github automation?)
+
+
+__version__ = '0.1.0'
 
 
 CONFIG_PATH = Path('config.toml')
