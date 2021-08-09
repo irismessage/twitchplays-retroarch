@@ -13,6 +13,7 @@ pyperclip==1.8.2
 PyRect==0.1.4
 PyScreeze==0.1.27
 PyTweening==1.0.3
+toml==0.10.2
 twitchio==2.0.5
 typing-extensions==3.10.0.0
 yarl==1.6.3

@@ -1,0 +1,5 @@
+[twitch]
+    # Account login token. Try https://twitchtokengenerator.com/. Should *not* begin with 'oauth:'.
+    token = ""
+    # Name of the Twitch channel to join and listen for commands in.
+    channel_to_join=""
