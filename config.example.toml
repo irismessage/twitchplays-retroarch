@@ -2,4 +2,9 @@
     # Account login token. Try https://twitchtokengenerator.com/. Should *not* begin with 'oauth:'.
     token = ""
     # Name of the Twitch channel to join and listen for commands in.
-    channel_to_join=""
+    channel_to_join = ""
+
+# For hotkey format details, see https://github.com/boppreh/keyboard#keyboardadd_hotkeyhotkey-callback-args-suppressfalse-timeout1-trigger_on_releasefalse
+[hotkeys]
+    # Turn twitchplays commands on or off.
+    toggle_allow_twitchplays_commands = "ctrl+shift+p"
