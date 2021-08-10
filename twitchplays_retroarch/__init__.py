@@ -18,9 +18,10 @@ import twitchio.ext.commands
 # todo: setup.py, pypi upload
 # todo: arguments like config location
 # todo: exe builder (github automation?)
+# todo: auto create config.toml from example
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 CONFIG_PATH = Path('config.toml')
