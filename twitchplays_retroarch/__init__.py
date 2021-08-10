@@ -1,5 +1,6 @@
 import queue
 import concurrent.futures
+import threading
 import time
 from pathlib import Path
 
@@ -52,9 +53,9 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
 
         self.input_queue = queue.Queue()
         # todo: close this sometime
-        # todo: workers don't start like this, change
-        self.thread_pool = concurrent.futures.ThreadPoolExecutor(
-            max_workers=input_threads, thread_name_prefix='InputHandler', initializer=self.input_handle_loop
+        # can be easily changed to a ProcessPoolExecutor
+        self.input_thread_pool = concurrent.futures.ThreadPoolExecutor(
+            max_workers=input_threads, thread_name_prefix='InputHandler'
         )
 
         super().__init__(*args, **kwargs)
@@ -71,15 +72,14 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
             status = 'disabled'
         print(f'Twitch Plays commands {status}.')
 
-    def input_handle_loop(self):
-        print('starting input loop')
-        while True:
-            if not self.input_queue.empty():
-                # todo: is there a way this get can error?
-                key_to_press = self.input_queue.get(block=False)
-                print(f'Executing input: {key_to_press}.')
-                pyautogui.press(key_to_press, interval=self.keypress_duration)
-                time.sleep(self.keypress_delay)
+    def input_queue_pop(self):
+        thread_name = threading.currentThread().name
+        print(f'Handling one input from queue, in thread {thread_name}.')
+
+        key_to_press = self.input_queue.get()
+        print(f'Executing input: {key_to_press}.')
+        pyautogui.press(key_to_press, interval=self.keypress_duration)
+        time.sleep(self.keypress_delay)
 
     async def process_twitchplays_commands(self, message: twitchio.Message) -> bool:
         commandset = self.test_keys_fbneo
@@ -92,6 +92,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
             key_to_press = commandset[command]
             print(f'Queueing input: {key_to_press}.')
             self.input_queue.put(key_to_press)
+            self.input_thread_pool.submit(self.input_queue_pop)
             return True
 
         return False
