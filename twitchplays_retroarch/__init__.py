@@ -15,9 +15,8 @@ import twitchio.ext.commands
 # todo: customisable command set
 # todo: sync command set with RetroArch config files
 # todo: write readme with guide
-# todo: setup.py, pypi upload
 # todo: arguments like config location
-# todo: exe builder (github automation?)
+# todo: github automation for builds, on release?
 # todo: auto create config.toml from example
 
 
