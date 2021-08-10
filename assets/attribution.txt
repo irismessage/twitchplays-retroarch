@@ -1,0 +1,2 @@
+https://raw.githubusercontent.com/TwitchIO/TwitchIO/master/logo.png
+https://github.com/libretro/retroarch-assets/blob/master/branding/retroarch-plain-logo.png
