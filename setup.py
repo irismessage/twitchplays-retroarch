@@ -17,7 +17,7 @@ setuptools.setup(
     url='https://github.com/JMcB17/twitchplays-retroarch',
     packages=setuptools.find_packages(),
     package_data={
-        '': 'config.example.toml',
+        '': ['config.example.toml'],
     },
     entry_points={
         'console_scripts': [
