@@ -108,9 +108,9 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         # handle commands, like in the base event_message
         await self.handle_commands(message)
 
-    def close(self):
+    async def close(self):
         self.input_thread_pool.shutdown()
-        super().close()
+        await super().close()
 
 
 def main():
@@ -130,9 +130,4 @@ def main():
         suppress=True
     )
 
-    try:
-        bot.run()
-    except KeyboardInterrupt:
-        print('Cleanly shutting down bot.')
-        bot.close()
-        print('Shut down bot cleanly.')
+    bot.run()
