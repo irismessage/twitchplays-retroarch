@@ -9,4 +9,5 @@ pyinstaller --noconfirm --log-level WARN ^
 --add-data config.example.toml;. ^
 --name twitchplays-retroarch ^
 --icon assets\tpra-logo1-256.ico ^
+--distpath dist\exe ^
 twitchplays_retroarch\__main__.py
