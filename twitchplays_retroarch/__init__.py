@@ -52,7 +52,6 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         self.twitchplays_commands_enabled = True
 
         self.input_queue = queue.Queue()
-        # todo: close this sometime
         # can be easily changed to a ProcessPoolExecutor
         self.input_thread_pool = concurrent.futures.ThreadPoolExecutor(
             max_workers=input_threads, thread_name_prefix='InputHandler'
@@ -109,6 +108,10 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         # handle commands, like in the base event_message
         await self.handle_commands(message)
 
+    def close(self):
+        self.input_thread_pool.shutdown()
+        super().close()
+
 
 def main():
     with open(CONFIG_PATH) as config_file:
@@ -127,4 +130,9 @@ def main():
         suppress=True
     )
 
-    bot.run()
+    try:
+        bot.run()
+    except KeyboardInterrupt:
+        print('Cleanly shutting down bot.')
+        bot.close()
+        print('Shut down bot cleanly.')
