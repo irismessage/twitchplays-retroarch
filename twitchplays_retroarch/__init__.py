@@ -18,6 +18,7 @@ import util
 # todo: sync command set with RetroArch config files
 # todo: write readme with guide
 # todo: arguments like config location
+# todo: hotkey sound?
 
 
 __version__ = '0.3.0'
@@ -147,11 +148,13 @@ def find_config(
     template_contents = ''
 
     # try to find the template depending on distribution
+    # if cloned from source, the example will be in the working directory
     if not template_contents:
         config_template_local = Path(config_template_name)
         if config_template_local.is_file():
             template_contents = config_template_local.read_text(encoding='utf-8')
 
+    # if installed via pip/pypi, the example will be in package resources
     if not template_contents:
         try:
             import pkg_resources
@@ -163,6 +166,8 @@ def find_config(
             if pkg_resources.resource_exists(__name__, config_template_name):
                 template_contents = pkg_resources.resource_string(__name__, config_template_name)
 
+    # if bundled with pyinstaller, sys.frozen will be True
+    # and the example will be in the temporary directory indicated by sys._MEIPASS
     if not template_contents:
         if getattr(sys, 'frozen', False):
             # noinspection PyProtectedMember
