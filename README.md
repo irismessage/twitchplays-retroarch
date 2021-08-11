@@ -40,7 +40,7 @@ Run the program for the first time, and it will prompt you to allow it to automa
 
 Open the file in a text editor. It's annotated with what each setting means.
 
-The most important settings are at the start of the file under the `twitch` header. You'll need to set them in order to run the bot successfully.
+The most important settings are at the start of the file under the `[twitch]` header. You'll need to set them in order to run the bot successfully.
 
 After that, you can read and edit the other settings if you want more customisation.
 
