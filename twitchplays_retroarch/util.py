@@ -1,11 +1,12 @@
+import sys
 from typing import Union, List
 
 
 def yn(
-        prompt: str = 'Y/n\n',
-        empty_response: Union[None, bool] = True,
-        affirmative: List[str] = None,
-        negative: List[str] = None
+    prompt: str = 'Y/n\n',
+    empty_response: Union[None, bool] = True,
+    affirmative: List[str] = None,
+    negative: List[str] = None
 ) -> bool:
     if affirmative is None:
         affirmative = ['y', 'yes']
@@ -20,3 +21,11 @@ def yn(
             return True
         elif response in negative:
             return False
+
+
+def q(
+    status: int = 0,
+    prompt: str = 'Press enter to exit.'
+):
+    input(prompt)
+    sys.exit(status)

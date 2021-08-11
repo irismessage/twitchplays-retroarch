@@ -1,5 +1,9 @@
-import queue
+"""Twitch Plays application for RetroArch/FBNeo, with input queue and chat control toggle shortcut."""
+
+
+import argparse
 import concurrent.futures
+import queue
 import threading
 import time
 import sys
@@ -11,17 +15,15 @@ import keyboard
 import toml
 import twitchio.ext.commands
 
-import util
+import twitchplays_retroarch.util as util
 
 
 # todo: add docstrings
 # todo: sync command set with RetroArch config files
-# todo: write readme with guide
-# todo: arguments like config location
 # todo: hotkey sound?
 
 
-__version__ = '0.3.0'
+__version__ = '0.3.0b'
 
 
 CONFIG_NAME = 'config.toml'
@@ -143,7 +145,7 @@ def find_config(
     create_template = util.yn(f'Create a template config file from {config_template_name}?\nY/n\n')
     if not create_template:
         log.fatal('No config file.')
-        sys.exit(1)
+        util.q(1)
 
     template_contents = ''
 
@@ -179,11 +181,27 @@ def find_config(
         config_file.write(template_contents)
 
     log.warning('Template config file created. Fill in essential details like Twitch token, and run the program again.')
-    sys.exit(2)
+    util.q(2)
+
+
+def get_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument(
+        'config_file', nargs='?', default=CONFIG_NAME,
+        help='Name of the file to get settings from, default %(default)s.\n'
+             "If it doesn't exist, you will be prompted to automatically create it from the built in template."
+    )
+
+    return parser
 
 
 def main():
-    config_path = find_config()
+    parser = get_parser()
+    args = parser.parse_args()
+
+    config_path = find_config(args.config_file)
 
     log.info('Loading config.')
     with open(config_path) as config_file:
