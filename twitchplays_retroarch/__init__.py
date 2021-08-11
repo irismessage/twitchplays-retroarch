@@ -11,18 +11,20 @@ import keyboard
 import toml
 import twitchio.ext.commands
 
+import util
+
 
 # todo: add docstrings
 # todo: sync command set with RetroArch config files
 # todo: write readme with guide
 # todo: arguments like config location
-# todo: auto create config.toml from example
 
 
 __version__ = '0.3.0'
 
 
-CONFIG_PATH = Path('config.toml')
+CONFIG_NAME = 'config.toml'
+CONFIG_TEMPLATE_NAME = 'config.example.toml'
 
 
 stream_handler = log.StreamHandler(stream=sys.stdout)
@@ -128,9 +130,58 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         await super().close()
 
 
+def find_config(
+        config_name: str = CONFIG_NAME,
+        config_template_name: str = CONFIG_TEMPLATE_NAME
+) -> Path:
+    config_path = Path(config_name)
+    if config_path.is_file():
+        return config_path
+
+    log.warning('Config file %s does not exist.', config_name)
+    create_template = util.yn(f'Create a template config file from {config_template_name}?\nY/n\n')
+    if not create_template:
+        log.fatal('No config file.')
+        sys.exit(1)
+
+    template_contents = ''
+
+    # try to find the template depending on distribution
+    if not template_contents:
+        config_template_local = Path(config_template_name)
+        if config_template_local.is_file():
+            template_contents = config_template_local.read_text(encoding='utf-8')
+
+    if not template_contents:
+        try:
+            import pkg_resources
+        except ImportError:
+            # for pycharm's dumb inspections
+            pkg_resources = None
+            assert pkg_resources is None
+        else:
+            if pkg_resources.resource_exists(__name__, config_template_name):
+                template_contents = pkg_resources.resource_string(__name__, config_template_name)
+
+    if not template_contents:
+        if getattr(sys, 'frozen', False):
+            # noinspection PyProtectedMember
+            bundle_dir = sys._MEIPASS
+            config_template_meipass = Path(bundle_dir) / config_template_name
+            template_contents = config_template_meipass.read_text(encoding='utf-8')
+
+    with open(config_path, 'x', encoding='utf-8') as config_file:
+        config_file.write(template_contents)
+
+    log.warning('Template config file created. Fill in essential details like Twitch token, and run the program again.')
+    sys.exit(2)
+
+
 def main():
+    config_path = find_config()
+
     log.info('Loading config.')
-    with open(CONFIG_PATH) as config_file:
+    with open(config_path) as config_file:
         config = toml.load(config_file)
 
     bot = TwitchPlaysRetroArchBot(
