@@ -21,9 +21,10 @@ import twitchplays_retroarch.util as util
 # todo: add docstrings
 # todo: sync command set with RetroArch config files
 # todo: hotkey sound?
+# todo: add bot commands like list twitchplays commands
 
 
-__version__ = '0.3.0b'
+__version__ = '0.3.0'
 
 
 CONFIG_NAME = 'config.toml'
@@ -180,7 +181,10 @@ def find_config(
     with open(config_path, 'x', encoding='utf-8') as config_file:
         config_file.write(template_contents)
 
-    log.warning('Template config file created. Fill in essential details like Twitch token, and run the program again.')
+    log.warning(
+        'Template config file created. '
+        'Fill in essential details like the Twitch login token, and run the program again.'
+    )
     util.q(2)
 
 

@@ -25,7 +25,7 @@ def yn(
 
 def q(
     status: int = 0,
-    prompt: str = 'Press enter to exit.'
+    prompt: str = 'Press enter to exit.\n'
 ):
     input(prompt)
     sys.exit(status)
