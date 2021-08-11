@@ -13,7 +13,6 @@ import twitchio.ext.commands
 
 
 # todo: add docstrings
-# todo: customisable command set
 # todo: sync command set with RetroArch config files
 # todo: write readme with guide
 # todo: arguments like config location
@@ -52,14 +51,16 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
 
     def __init__(
             self,
-            case_sensitive: bool = False,
             keypress_delay: float = 0.1, keypress_duration: float = 0.1,
             input_threads: int = 1,
+            commandset: dict = None,
+            case_insensitive: bool = True,
             *args, **kwargs
     ):
-        self.case_sensitive = case_sensitive
         self.keypress_delay = keypress_delay
         self.keypress_duration = keypress_duration
+        self.commandset = commandset
+        self.case_insensitive = case_insensitive
         # for pausing user control
         self.twitchplays_commands_enabled = True
 
@@ -69,7 +70,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
             max_workers=input_threads, thread_name_prefix='InputHandler'
         )
 
-        super().__init__(*args, **kwargs)
+        super().__init__(case_insensitive=case_insensitive, *args, **kwargs)
 
     async def event_ready(self):
         log.info('Bot started.')
@@ -93,10 +94,10 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         time.sleep(self.keypress_delay)
 
     async def process_twitchplays_commands(self, message: twitchio.Message) -> bool:
-        commandset = self.test_keys_fbneo
+        commandset = self.commandset
 
         command = message.content
-        if not self.case_sensitive:
+        if self.case_insensitive:
             command = command.casefold()
 
         if command in commandset:
@@ -134,9 +135,13 @@ def main():
 
     bot = TwitchPlaysRetroArchBot(
         token=config['twitch']['token'],
-        # todo: put in config?
-        prefix='!',
-        initial_channels=[config['twitch']['channel_to_join']]
+        prefix=config['bot']['prefix'],
+        initial_channels=[config['twitch']['channel_to_join']],
+        case_insensitive=config['bot']['case_insensitive'],
+        input_threads=config['bot']['input_threads'],
+        keypress_duration=config['bot']['keypress_duration'],
+        keypress_delay=config['bot']['keypress_duration'],
+        commandset=config['keys']
     )
 
     keyboard.add_hotkey(

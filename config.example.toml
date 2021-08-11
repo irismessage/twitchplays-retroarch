@@ -1,10 +1,43 @@
 [twitch]
-    # Account login token. Try https://twitchtokengenerator.com/. Should *not* begin with 'oauth:'.
-    token = ""
-    # Name of the Twitch channel to join and listen for commands in.
-    channel_to_join = ""
+# Account login token. Try https://twitchtokengenerator.com/. Should not begin with 'oauth:'.
+token = ""
+# Name of the Twitch channel to join and listen for commands in.
+channel_to_join = ""
 
-# For hotkey format details, see https://github.com/boppreh/keyboard#keyboardadd_hotkeyhotkey-callback-args-suppressfalse-timeout1-trigger_on_releasefalse
+# Twitch Plays commands.
+# On the left is the command name to type in chat, which can be anything.
+# On the right is the name of the key to press for PyAutoGUI:
+# https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys
+[keys]
+up = "up"
+down = "down"
+left = "left"
+right = "right"
+button1 = "z"
+button2 = "x"
+start = "enter"
+COIN = "shiftright"
+
+[bot]
+# Prefix for commands.
+prefix = "!"
+# Whether to make Twitch Plays commands case sensitive.
+# Case insensitive by default, because it fixes the problem of twitch not allowing consecutive identical messages.
+case_insensitive = true
+# How long to hold each key press for, in seconds.
+# Decimals allowed.
+keypress_duration = 0.1
+# How long to leave between different keypresses at minimum.
+keypress_delay = 0.1
+# The number of threads for input emulation.
+# AKA, how many twitch plays commands will be run at once.
+# Useful for scaling for very large Twitch chats.
+# Should be a whole number.
+input_threads = 1
+
+# For hotkey format details:
+# https://github.com/boppreh/keyboard#keyboardadd_hotkeyhotkey-callback-args-suppressfalse-timeout1-trigger_on_releasefalse
+# To disable a hotkey, leave it blank.
 [hotkeys]
-    # Turn twitchplays commands on or off.
-    toggle_allow_twitchplays_commands = "ctrl+shift+p"
+# Turn twitchplays commands on or off.
+toggle_allow_twitchplays_commands = "ctrl+shift+p"
