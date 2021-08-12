@@ -1,7 +1,7 @@
 # twitchplays-retroarch
 Twitch Plays application for RetroArch/FBNeo, with input queue and chat control toggle shortcut.
 
-Commissioned by zdg3477 on Fiverr.
+Commissioned by twitch.tv/LastTimeLord.
 
 Made with [twitchio](https://github.com/TwitchIO/TwitchIO) and [PyAutoGUI](https://github.com/asweigart/pyautogui) ([PyDirectInput](https://github.com/learncodebygaming/pydirectinput) when on Windows).
 
