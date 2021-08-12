@@ -1,5 +1,7 @@
 """Utility functions for command line script."""
 
+import ctypes
+import os
 import sys
 from typing import Union, List
 
@@ -41,3 +43,11 @@ def q(
     """Wait for any input with prompt, then call sys.exit with status."""
     input(prompt)
     sys.exit(status)
+
+
+def running_elevated() -> bool:
+    """Return whether the program is running as admin or root."""
+    if sys.platform == 'win32':
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    elif sys.platform.startswith('linux'):
+        return os.geteuid() == 0

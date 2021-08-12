@@ -38,7 +38,6 @@ else:
 
 # todo: sync command set with RetroArch config files
 # todo: hotkey sound?
-# todo: check if running as admin on startup
 # todo: check if keys in config are valid on startup?
 
 
@@ -323,6 +322,9 @@ def main():
         bot.twitchplays_commands_toggle,
         suppress=True
     )
+
+    if not util.running_elevated():
+        log.warning('Not running as admin. Hotkeys and input emulation may misbehave.')
 
     log.info('Starting bot.')
     bot.run()
