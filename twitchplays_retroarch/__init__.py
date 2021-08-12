@@ -110,15 +110,21 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         """Log ready message."""
         log.info('Bot started.')
 
-    def twitchplays_commands_toggle(self):
-        """Switch self.twitchplays_commands_enabled, and log a status message."""
+    def twitchplays_commands_toggle(self) -> str:
+        """Switch self.twitchplays_commands_enabled, and log a status message.
+
+        Return the status message.
+        """
         self.twitchplays_commands_enabled = not self.twitchplays_commands_enabled
 
         if self.twitchplays_commands_enabled:
             status = 'enabled'
         else:
             status = 'disabled'
-        log.info(f'Twitch Plays commands {status}.')
+        status_message = f'Twitch Plays commands {status}.'
+        log.info(status_message)
+
+        return status_message
 
     def input_queue_pop(self):
         """Get one key name from self.input_queue and press it with PyAutoGUI or PyDirectInput.
@@ -214,6 +220,16 @@ class TwitchPlaysRetroArchBot(commands.Bot):
             '!commands -> Twitch Plays commands, \n'
             '!github -> source code, \n'
         )
+
+    # @commands.command()
+    # async def toggle_twitchplays_bot_command(self, ctx: commands.Context):
+    #     # should be a check?
+    #     command_invoker = ctx.author
+    #     if isinstance(command_invoker, twitchio.PartialChatter):
+    #         # idk how to make sure it has is_mod
+    #         # twitchio 2 sucks
+    #
+    #     return await ctx.send(self.twitchplays_commands_toggle())
 
 
 def find_config(
