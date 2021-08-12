@@ -3,7 +3,7 @@ Twitch Plays application for RetroArch/FBNeo, with input queue and chat control 
 
 Commissioned by zdg3477 on Fiverr.
 
-Made with [twitchio](https://github.com/TwitchIO/TwitchIO) and [PyAutoGUI](https://github.com/asweigart/pyautogui).
+Made with [twitchio](https://github.com/TwitchIO/TwitchIO) and [PyAutoGUI](https://github.com/asweigart/pyautogui) ([PyDirectInput](https://github.com/learncodebygaming/pydirectinput) when on Windows).
 
 Informed by [controlmypc](https://gitlab.com/controlmypc/TwitchPlays) and DougDoug's Twitch Plays projects.
 
