@@ -16,7 +16,7 @@ setuptools.setup(
     description='witch Plays application for RetroArch/FBNeo, with input queue and chat control toggle shortcut.',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/JMcB17/twitchplays-retroarch',
+    url=twitchplays_retroarch.GITHUB_LINK,
     packages=setuptools.find_packages(),
     package_data={
         '': ['config.example.toml'],

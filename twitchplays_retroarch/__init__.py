@@ -25,7 +25,8 @@ from pathlib import Path
 
 import keyboard
 import toml
-import twitchio.ext.commands
+import twitchio
+from twitchio.ext import commands
 
 from twitchplays_retroarch import util
 
@@ -37,16 +38,16 @@ else:
 
 # todo: sync command set with RetroArch config files
 # todo: hotkey sound?
-# todo: add bot commands like list twitchplays commands
 # todo: check if running as admin on startup
 # todo: check if keys in config are valid on startup?
 
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 CONFIG_NAME = 'config.toml'
 CONFIG_TEMPLATE_NAME = 'config.example.toml'
+GITHUB_LINK = 'https://github.com/JMcB17/twitchplays-retroarch'
 
 
 stream_handler = log.StreamHandler(stream=sys.stdout)
@@ -61,7 +62,7 @@ log.basicConfig(
 )
 
 
-class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
+class TwitchPlaysRetroArchBot(commands.Bot):
     """Implementation of Bot."""
 
     test_keys_fbneo = {
@@ -181,6 +182,39 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         log.info('Shutting down bot.')
         self.input_thread_pool.shutdown()
         await super().close()
+
+    def format_twitchplays_commands(
+            self, commandset: dict = None, format_string: str = '{} -> {}, \n'
+    ) -> str:
+        """Return the commandset as a formatted string."""
+        if commandset is None:
+            commandset = self.commandset
+
+        commands_formatted = []
+        for invocation, key in commandset.items():
+            commands_formatted.append(format_string.format(invocation, key))
+
+        return '\n'.join(commands_formatted)
+
+    # normal bot commands
+    @commands.command(name='github', aliases=['program', 'code'])
+    async def github_link(self, ctx: commands.Context):
+        """Send source code link in chat."""
+        return await ctx.send(GITHUB_LINK)
+
+    @commands.command(name='commands', aliases=['twitchplays'])
+    async def commands_help(self, ctx: commands.Context):
+        """Send Twitch Plays commands in chat."""
+        return await ctx.send(self.format_twitchplays_commands())
+
+    @commands.command(name='help', aliases=['info'])
+    async def general_help(self, ctx: commands.Context):
+        """Send a help message in chat."""
+        return await ctx.send(
+            '!help -> this, \n'
+            '!commands -> Twitch Plays commands, \n'
+            '!github -> source code, \n'
+        )
 
 
 def find_config(
