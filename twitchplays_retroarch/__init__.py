@@ -121,7 +121,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         log.info(f'Twitch Plays commands {status}.')
 
     def input_queue_pop(self):
-        """Get one key name from self.input_queue and press it with PyAutoGUI or PyDirectInpt.
+        """Get one key name from self.input_queue and press it with PyAutoGUI or PyDirectInput.
 
         Designed to be submitted to a threadpool.
         """
