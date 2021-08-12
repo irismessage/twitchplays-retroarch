@@ -63,6 +63,7 @@ log.basicConfig(
 
 class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
     """Implementation of Bot."""
+
     test_keys_fbneo = {
         'up': 'up',
         'down': 'down',
