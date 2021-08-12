@@ -1,3 +1,5 @@
+"""Build for PyPI."""
+
 import setuptools
 import twitchplays_retroarch
 

@@ -1,4 +1,17 @@
-"""Twitch Plays application for RetroArch/FBNeo, with input queue and chat control toggle shortcut."""
+"""Twitch Plays application for RetroArch/FBNeo, with input queue and chat control toggle shortcut.
+
+Files:
+- config.toml - private configuration file
+- config.example.toml - template configuration file, may be stored in package directory or bundled exe.
+Return codes:
+- 0 ok
+- 1 no config
+- 2 config created from template
+
+Contains custom Bot class and main function.
+
+For more info check README.md.
+"""
 
 
 import argparse
@@ -14,7 +27,7 @@ import keyboard
 import toml
 import twitchio.ext.commands
 
-import twitchplays_retroarch.util as util
+from twitchplays_retroarch import util
 
 if sys.platform == 'win32':
     import pydirectinput
@@ -22,7 +35,6 @@ else:
     import pyautogui
 
 
-# todo: add docstrings
 # todo: sync command set with RetroArch config files
 # todo: hotkey sound?
 # todo: add bot commands like list twitchplays commands
@@ -50,6 +62,7 @@ log.basicConfig(
 
 
 class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
+    """Implementation of Bot."""
     test_keys_fbneo = {
         'up': 'up',
         'down': 'down',
@@ -63,12 +76,20 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
 
     def __init__(
             self,
+            *args,
             keypress_delay: float = 0.1, keypress_duration: float = 0.1,
             input_threads: int = 1,
             commandset: dict = None,
             case_insensitive: bool = True,
-            *args, **kwargs
+            **kwargs
     ):
+        """Initialise the bot instance.
+
+        The case_insensitive argument is made into an attribute and then passed to the subclassed constructor.
+        A ThreadPoolExecutor is created with input_threads as max_workers.
+        It could easily be changed to a ProcessPoolExecutor.
+        A Queue is also created.
+        """
         self.keypress_delay = keypress_delay
         self.keypress_duration = keypress_duration
         self.commandset = commandset
@@ -85,9 +106,11 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         super().__init__(case_insensitive=case_insensitive, *args, **kwargs)
 
     async def event_ready(self):
+        """Log ready message."""
         log.info('Bot started.')
 
     def twitchplays_commands_toggle(self):
+        """Switch self.twitchplays_commands_enabled, and log a status message."""
         self.twitchplays_commands_enabled = not self.twitchplays_commands_enabled
 
         if self.twitchplays_commands_enabled:
@@ -97,6 +120,10 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         log.info(f'Twitch Plays commands {status}.')
 
     def input_queue_pop(self):
+        """Get one key name from self.input_queue and press it with PyAutoGUI or PyDirectInpt.
+
+        Designed to be submitted to a threadpool.
+        """
         thread_name = threading.currentThread().name
         log.info('%s: Handling one input from queue.', thread_name)
 
@@ -114,6 +141,11 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         time.sleep(self.keypress_delay)
 
     async def process_twitchplays_commands(self, message: twitchio.Message) -> bool:
+        """Check the message's contents to see if it matches self.commandset, and queue an input to self.input_queue.
+
+        Return True if a Twitch Plays command was read and queued, False otherwise.
+        Uses str.casefold() on the message if self.case_insensitive is set to True.
+        """
         commandset = self.commandset
 
         command = message.content
@@ -130,6 +162,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         return False
 
     async def event_message(self, message: twitchio.Message):
+        """Override event_message - log the message and call self.process_twitchplays_commands on it."""
         # ignore messages from the bot
         if message.echo:
             log.info('Ignoring message from bot: %s', message.content)
@@ -143,6 +176,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
         await self.handle_commands(message)
 
     async def close(self):
+        """Override this method to close the threadpool and also log a message."""
         log.info('Shutting down bot.')
         self.input_thread_pool.shutdown()
         await super().close()
@@ -152,6 +186,14 @@ def find_config(
         config_name: str = CONFIG_NAME,
         config_template_name: str = CONFIG_TEMPLATE_NAME
 ) -> Path:
+    """Check if a config file named config_name exists in the working dir, if it doesn't prompt to create it.
+
+    Calls sys.exit with code 1 if user declines to create config and 2 if config tempalte is created successfully.
+    Searches in three locations for the config template with name config_tempalte_name:
+        - The working directory
+        - The package resources, with pkg_resources module - works with all setuptools installs, like from PyPI
+        - The temp dir used by pyinstaller
+    """
     config_path = Path(config_name)
     if config_path.is_file():
         return config_path
@@ -203,6 +245,10 @@ def find_config(
 
 
 def get_parser() -> argparse.ArgumentParser:
+    """Return the ArgumentParser for this script.
+
+    Has a description from __doc__, and a version command from __version__.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('--version', action='version', version=__version__)
@@ -216,6 +262,7 @@ def get_parser() -> argparse.ArgumentParser:
 
 
 def main():
+    """Main entry point - load config and run a bot."""
     parser = get_parser()
     args = parser.parse_args()
 
