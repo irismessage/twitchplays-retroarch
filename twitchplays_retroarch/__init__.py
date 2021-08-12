@@ -10,21 +10,27 @@ import sys
 import logging as log
 from pathlib import Path
 
-import pyautogui
 import keyboard
 import toml
 import twitchio.ext.commands
 
 import twitchplays_retroarch.util as util
 
+if sys.platform == 'win32':
+    import pydirectinput
+else:
+    import pyautogui
+
 
 # todo: add docstrings
 # todo: sync command set with RetroArch config files
 # todo: hotkey sound?
 # todo: add bot commands like list twitchplays commands
+# todo: check if running as admin on startup
+# todo: check if keys in config are valid on startup?
 
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 
 CONFIG_NAME = 'config.toml'
@@ -96,7 +102,15 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
 
         key_to_press = self.input_queue.get()
         log.info('%s: Executing input: %s.', thread_name, key_to_press)
-        pyautogui.press(key_to_press, interval=self.keypress_duration)
+
+        if sys.platform == 'win32':
+            input_emulator = pydirectinput
+        else:
+            input_emulator = pyautogui
+        input_emulator.keyDown(key_to_press)
+        time.sleep(self.keypress_duration)
+        input_emulator.keyUp(key_to_press)
+
         time.sleep(self.keypress_delay)
 
     async def process_twitchplays_commands(self, message: twitchio.Message) -> bool:
@@ -121,7 +135,7 @@ class TwitchPlaysRetroArchBot(twitchio.ext.commands.bot.Bot):
             log.info('Ignoring message from bot: %s', message.content)
             return
 
-        log.info('Got user message: %s', message.content)
+        log.info('Got user message: %s: %s', message.author.name, message.content)
         if self.twitchplays_commands_enabled:
             await self.process_twitchplays_commands(message)
 

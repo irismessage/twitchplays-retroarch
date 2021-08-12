@@ -8,6 +8,8 @@ channel_to_join = ""
 # On the left is the command name to type in chat, which can be anything.
 # On the right is the name of the key to press for PyAutoGUI:
 # https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys
+# Key identifier is case sensitive.
+# If you set the bot to be case insensitive, command name must be lower case.
 [keys]
 up = "up"
 down = "down"
@@ -16,7 +18,7 @@ right = "right"
 button1 = "z"
 button2 = "x"
 start = "enter"
-COIN = "shiftright"
+coin = "shiftright"
 
 [bot]
 # Prefix for commands.

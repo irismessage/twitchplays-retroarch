@@ -36,6 +36,7 @@ setuptools.setup(
     install_requires=[
         'twitchio>=2,<3',
         'PyAutoGUI>=0.9,<0.10',
+        'PyDirectInput>=1,<2',
         'toml>=0.10,<0.11',
         'keyboard>=0.13,<0.14',
     ]
