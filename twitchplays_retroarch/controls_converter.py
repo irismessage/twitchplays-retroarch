@@ -55,6 +55,43 @@ MAPPING = {
 }
 CFG_KEY_PATTERN = re.compile(r'input_(player[0-9]{1,2})_([a-z0-9_]+)')
 CONFIG_DUMMY_HEADER = 'config'
+LIBRETRO_CFG_LOCATIONS = {
+    'win32': [
+        Path(r'C:\RetroArch-Win64'),
+        Path(r'C:\Program Files\RetroArch'),
+        Path(r'C:\Program Files (x86)\RetroArch'),
+        Path.home().joinpath(r'AppData\Roaming\RetroArch'),
+    ],
+    'darwin': [
+        Path.home().joinpath('Library/Application Support/Retroarch'),
+    ],
+    'linux': [
+        Path('/etc'),
+        Path.home(),
+        Path.home().joinpath('.config/retroarch'),
+    ]
+}
+
+
+def convert_dicts(libretro_config: dict, mapping: dict) -> dict:
+    """Convert a config dict from libretro cfg to one for toml."""
+    toml_config = {}
+
+    # actual conversion here
+    for key, value in libretro_config.items():
+        key_match = re.match(CFG_KEY_PATTERN, key)
+        if key_match:
+            # libretro cfg uses quotes around values, configparser doesn't
+            libretro_keycode = value.strip('"')
+            player_id = key_match[1]
+            key_name = key_match[2]
+
+            # try to get PyAutoGUI equivalent keycode from mapping. If it's not in the mapping it should be the same
+            pyautogui_keycode = mapping.get(libretro_keycode, default=libretro_keycode)
+
+            toml_config[player_id][key_name] = pyautogui_keycode
+
+    return toml_config
 
 
 def libretro_cfg_to_pyautogui_toml(in_path: Path, out_path: Path, mapping: dict = None):
@@ -75,21 +112,7 @@ def libretro_cfg_to_pyautogui_toml(in_path: Path, out_path: Path, mapping: dict 
     config_parser.read_string(in_string, source=str(in_path))
 
     libretro_config = config_parser[CONFIG_DUMMY_HEADER]
-    toml_config = {}
-
-    # actual conversion here
-    for key, value in libretro_config.items():
-        key_match = re.match(CFG_KEY_PATTERN, key)
-        if key_match:
-            # libretro cfg uses quotes around values, configparser doesn't
-            libretro_keycode = value.strip('"')
-            player_id = key_match[1]
-            key_name = key_match[2]
-
-            # try to get PyAutoGUI equivalent keycode from mapping. If it's not in the mapping it should be the same
-            pyautogui_keycode = mapping.get(libretro_keycode, default=libretro_keycode)
-
-            toml_config[player_id][key_name] = pyautogui_keycode
+    toml_config = convert_dicts(libretro_config, mapping)
 
     with open(out_path, 'w', encoding='utf-8') as toml_file:
         toml.dump(toml_config, toml_file)
