@@ -40,7 +40,7 @@ else:
 # todo: check if keys in config are valid on startup?
 
 
-__version__ = '0.7.0'
+__version__ = '0.6.0'
 
 
 CONFIG_NAME = 'config.toml'

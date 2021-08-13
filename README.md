@@ -12,6 +12,7 @@ Informed by [controlmypc](https://gitlab.com/controlmypc/TwitchPlays) and DougDo
 - Hotkeys - add global hotkeys (will work when not focused on the program window) for pausing chat control. Powered by [keyboard](https://github.com/boppreh/keyboard).
 - Scalable - can use a thread pool to execute multiple inputs simultaneously.
 - Customisable - change settings and commands in `config.toml`.
+- Bot commands - try `!help`
 
 ## Installation and Usage:
 ### Download as an exe
