@@ -98,6 +98,8 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         # for pausing user control
         self.twitchplays_commands_enabled = True
 
+        self.commandset_casefold = {key.casefold(): value for key, value in self.commandset.items()}
+
         self.input_queue = queue.Queue()
         # can be easily changed to a ProcessPoolExecutor
         self.input_thread_pool = concurrent.futures.ThreadPoolExecutor(
@@ -156,11 +158,12 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         Return True if a Twitch Plays command was read and queued, False otherwise.
         Uses str.casefold() on the message if self.case_insensitive is set to True.
         """
-        commandset = self.commandset
-
         command = message.content
         if self.case_insensitive:
             command = command.casefold()
+            commandset = self.commandset_casefold
+        else:
+            commandset = self.commandset
 
         if command in commandset:
             key_to_press = commandset[command]
