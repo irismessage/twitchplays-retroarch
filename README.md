@@ -13,6 +13,7 @@ Informed by [controlmypc](https://gitlab.com/controlmypc/TwitchPlays) and DougDo
 - Scalable - can use a thread pool to execute multiple inputs simultaneously.
 - Customisable - change settings and commands in `config.toml`.
 - Bot commands - try `!help`
+- - WIP: automatically locate RetroArch's config file and use it to make config templates for this program
 
 ## Installation and Usage:
 ### Download as an exe
