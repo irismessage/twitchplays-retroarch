@@ -41,7 +41,7 @@ else:
 # todo: check if keys in config are valid on startup?
 
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 
 
 CONFIG_NAME = 'config.toml'
@@ -110,6 +110,14 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         """Log ready message."""
         log.info('Bot started.')
 
+    def twitchplays_commands_status(self) -> str:
+        """Return whether twitchplays commands are enabled."""
+        if self.twitchplays_commands_enabled:
+            status = 'enabled'
+        else:
+            status = 'disabled'
+        return f'Twitch Plays commands {status}.'
+
     def twitchplays_commands_toggle(self) -> str:
         """Switch self.twitchplays_commands_enabled, and log a status message.
 
@@ -117,13 +125,8 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         """
         self.twitchplays_commands_enabled = not self.twitchplays_commands_enabled
 
-        if self.twitchplays_commands_enabled:
-            status = 'enabled'
-        else:
-            status = 'disabled'
-        status_message = f'Twitch Plays commands {status}.'
+        status_message = self.twitchplays_commands_status()
         log.info(status_message)
-
         return status_message
 
     def input_queue_pop(self):
@@ -189,7 +192,7 @@ class TwitchPlaysRetroArchBot(commands.Bot):
         await super().close()
 
     def format_twitchplays_commands(
-            self, commandset: dict = None, format_string: str = '{} -> {}, \n'
+            self, commandset: dict = None, format_string: str = '{} -> {}; \n'
     ) -> str:
         """Return the commandset as a formatted string."""
         if commandset is None:
@@ -203,33 +206,37 @@ class TwitchPlaysRetroArchBot(commands.Bot):
 
     # normal bot commands
     @commands.command(name='github', aliases=['program', 'code'])
-    async def github_link(self, ctx: commands.Context):
+    async def command_github_link(self, ctx: commands.Context):
         """Send source code link in chat."""
         return await ctx.send(GITHUB_LINK)
 
     @commands.command(name='commands', aliases=['twitchplays'])
-    async def commands_help(self, ctx: commands.Context):
+    async def command_help_twitchplays(self, ctx: commands.Context):
         """Send Twitch Plays commands in chat."""
         return await ctx.send(self.format_twitchplays_commands())
 
     @commands.command(name='help', aliases=['info'])
-    async def general_help(self, ctx: commands.Context):
+    async def command_help_general(self, ctx: commands.Context):
         """Send a help message in chat."""
         return await ctx.send(
-            '!help -> this, \n'
-            '!commands -> Twitch Plays commands, \n'
-            '!github -> source code, \n'
+            '!help -> this; \n'
+            '!commands -> Twitch Plays commands; \n'
+            '!arecommandson -> check if Twitch Plays commands are enabled; \n'
+            '!togglecommands -> toggle Twitch Plays commands on/off (mod only); \n'
+            '!github -> source code; \n'
         )
 
-    # @commands.command()
-    # async def toggle_twitchplays_bot_command(self, ctx: commands.Context):
-    #     # should be a check?
-    #     command_invoker = ctx.author
-    #     if isinstance(command_invoker, twitchio.PartialChatter):
-    #         # idk how to make sure it has is_mod
-    #         # twitchio 2 sucks
-    #
-    #     return await ctx.send(self.twitchplays_commands_toggle())
+    @commands.command(name='togglecommands')
+    async def command_toggle_twitchplays(self, ctx: commands.Context):
+        # should be a check? twitchio2 may not have them yet
+        if not (ctx.author.is_mod or ctx.author.name == self.nick):
+            return await ctx.send('no <3')
+
+        return await ctx.send(self.twitchplays_commands_toggle())
+
+    @commands.command(name='arecommandson', aliases=['arecommandsenabled'])
+    async def command_check_twitchplays(self, ctx: commands.Context):
+        return await ctx.send(self.twitchplays_commands_status())
 
 
 def find_config(
