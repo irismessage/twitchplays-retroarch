@@ -1,3 +1,7 @@
+git archive -o downloads\twitchplays-retroarch.zip HEAD
+git archive -o downloads\twitchplays-retroarch.tar.gz HEAD
+git bundle create downloads\twitchplays_retroarch.bundle main
+
 .venv\Scripts\python.exe -m pip install -U pip wheel setuptools
 .venv\Scripts\python.exe setup.py sdist bdist_wheel
 
