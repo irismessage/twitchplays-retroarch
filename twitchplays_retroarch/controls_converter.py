@@ -1,8 +1,13 @@
 import configparser
 import re
+import sys
+import logging as log
 from pathlib import Path
+from typing import Union
 
 import toml
+
+from twitchplays_retroarch import GITHUB_LINK, CONFIG_NAME
 
 # mapping of RetroArch code (left) to PyAutoGUI code (right)
 # https://gist.github.com/Monroe88/0f7aa02156af6ae2a0e728852dcbfc90 and experimentation for libretro codes
@@ -54,23 +59,8 @@ MAPPING = {
     'keypad9': 'num9',
 }
 CFG_KEY_PATTERN = re.compile(r'input_(player[0-9]{1,2})_([a-z0-9_]+)')
-CONFIG_DUMMY_HEADER = 'config'
-LIBRETRO_CFG_LOCATIONS = {
-    'win32': [
-        Path(r'C:\RetroArch-Win64'),
-        Path(r'C:\Program Files\RetroArch'),
-        Path(r'C:\Program Files (x86)\RetroArch'),
-        Path.home().joinpath(r'AppData\Roaming\RetroArch'),
-    ],
-    'darwin': [
-        Path.home().joinpath('Library/Application Support/Retroarch'),
-    ],
-    'linux': [
-        Path('/etc'),
-        Path.home(),
-        Path.home().joinpath('.config/retroarch'),
-    ]
-}
+CFG_NAME = 'retroarch.cfg'
+CONVERSION_DEST = 'converted-retroarch-controls.toml'
 
 
 def convert_dicts(libretro_config: dict, mapping: dict) -> dict:
@@ -108,11 +98,89 @@ def libretro_cfg_to_pyautogui_toml(in_path: Path, out_path: Path, mapping: dict 
     config_parser = configparser.ConfigParser()
     # need to do this because configparser needs headers and libretro cfg doesn't have them
     in_string = in_path.read_text(encoding='utf-8')
-    in_string = f'[{CONFIG_DUMMY_HEADER}]\n' + in_string
+    config_dummy_header = 'config'
+    in_string = f'[{config_dummy_header}]\n' + in_string
     config_parser.read_string(in_string, source=str(in_path))
+    libretro_config = config_parser[config_dummy_header]
 
-    libretro_config = config_parser[CONFIG_DUMMY_HEADER]
     toml_config = convert_dicts(libretro_config, mapping)
 
     with open(out_path, 'w', encoding='utf-8') as toml_file:
         toml.dump(toml_config, toml_file)
+
+
+def locate_libretro_config() -> Union[Path, None]:
+    """Try to find libretro.cfg depending on platform.
+
+    Returns None if not found in search locations.
+    """
+    libretro_cfg_locations_platforms = {
+        'win32': [
+            Path(r'C:\RetroArch-Win64'),
+            Path(r'C:\Program Files\RetroArch'),
+            Path(r'C:\Program Files (x86)\RetroArch'),
+            Path.home().joinpath(r'AppData\Roaming\RetroArch'),
+        ],
+        'darwin': [
+            Path.home().joinpath('Library/Application Support/Retroarch'),
+        ],
+        'linux': [
+            Path('/etc'),
+            Path.home(),
+            Path.home().joinpath('.config/retroarch'),
+        ]
+    }
+    libretro_cfg_locations_default = [Path()]
+
+    for platform in libretro_cfg_locations_platforms.keys():
+        if sys.platform.startswith(platform):
+            cfg_locations = libretro_cfg_locations_platforms[platform]
+            break
+    else:
+        cfg_locations = libretro_cfg_locations_default
+
+    for location in cfg_locations:
+        if location.is_dir():
+            return location / CFG_NAME
+
+    return None
+
+
+def auto_conversion(cfg_location: Path = None):
+    """Search for and convert libretro config.
+
+    Uses locate_retroarch_config if not given as argument.
+    Returns True if successful.
+    """
+    log.info('Trying to automatically convert RetroArch controls settings to use..')
+
+    # try to find if not given as an argument
+    if cfg_location is None:
+        log.info('Searching for RetroArch installation..')
+        cfg_location = locate_libretro_config()
+    # search failed, quit
+    if cfg_location is None:
+        log.error(
+            'Unable to location RetroArch installation. \n'
+            "  If you have RetroArch installed in a normal location but it couldn't be found, please get in touch. \n"
+            '  (%s) \n'
+            '  If you can find RetroArch/retroarch.cfg yourself, copy it into this folder, or use the -rc argument.',
+            GITHUB_LINK
+        )
+        return False
+
+    log.info('Found RetroArch config at %s.', cfg_location)
+    dest = Path(CONVERSION_DEST)
+    log.info('Converting RetroArch controls configuration to %s.', dest)
+    # todo: better error handling?
+    try:
+        libretro_cfg_to_pyautogui_toml(cfg_location, dest)
+    except Exception as error:
+        log.error('Unable to convert libretro config!', exc_info=error)
+        return False
+    else:
+        log.info(
+            'Successfully converted RetroArch configuration. Check %s for control scheme templates to put in %s!',
+            dest, CONFIG_NAME
+        )
+        return True

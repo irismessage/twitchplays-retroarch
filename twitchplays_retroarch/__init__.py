@@ -28,7 +28,7 @@ import toml
 import twitchio
 from twitchio.ext import commands
 
-from twitchplays_retroarch import util
+from twitchplays_retroarch import util, controls_converter
 
 if sys.platform == 'win32':
     import pydirectinput
@@ -40,7 +40,7 @@ else:
 # todo: check if keys in config are valid on startup?
 
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 
 CONFIG_NAME = 'config.toml'
@@ -316,6 +316,11 @@ def get_parser() -> argparse.ArgumentParser:
         help='Name of the file to get settings from, default %(default)s.\n'
              "If it doesn't exist, you will be prompted to automatically create it from the built in template."
     )
+    parser.add_argument(
+        '-rc', '--retroarch-config', type=Path,
+        help="Location of RetroArch's retroarch.cfg settings file. Used to helpfully convert controls. \n"
+             'If not given, will be searched for automatically.'
+    )
 
     return parser
 
@@ -325,9 +330,10 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    config_path = find_config(args.config_file)
+    controls_converter.auto_conversion(args.retroarch_config)
 
-    log.info('Loading config.')
+    config_path = find_config(args.config_file)
+    log.info('Loading config..')
     with open(config_path) as config_file:
         config = toml.load(config_file)
 
@@ -351,5 +357,5 @@ def main():
     if not util.running_elevated():
         log.warning('Not running as admin. Hotkeys and input emulation may misbehave.')
 
-    log.info('Starting bot.')
+    log.info('Starting bot..')
     bot.run()

@@ -1,5 +1,6 @@
 *.toml
 !config.example.toml
+*.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
