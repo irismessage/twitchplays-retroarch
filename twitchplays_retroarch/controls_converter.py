@@ -1,3 +1,5 @@
+"""Tools for converting RetroArch controls to command sets for Twitch Plays."""
+
 import configparser
 import re
 import sys
@@ -137,7 +139,7 @@ def locate_libretro_config() -> Union[Path, None]:
     }
     libretro_cfg_locations_default = [Path()]
 
-    for platform in libretro_cfg_locations_platforms.keys():
+    for platform in libretro_cfg_locations_platforms:
         if sys.platform.startswith(platform):
             cfg_locations = libretro_cfg_locations_platforms[platform]
             break

@@ -228,6 +228,7 @@ class TwitchPlaysRetroArchBot(commands.Bot):
 
     @commands.command(name='togglecommands')
     async def command_toggle_twitchplays(self, ctx: commands.Context):
+        """Toggle Twitch Plays commands on/off (mod only)."""
         # should be a check? twitchio2 may not have them yet
         if not (ctx.author.is_mod or ctx.author.name == self.nick):
             return await ctx.send('no <3')
@@ -236,6 +237,7 @@ class TwitchPlaysRetroArchBot(commands.Bot):
 
     @commands.command(name='arecommandson', aliases=['arecommandsenabled'])
     async def command_check_twitchplays(self, ctx: commands.Context):
+        """Check if Twitch Plays commands are enabled."""
         return await ctx.send(self.twitchplays_commands_status())
 
 
@@ -302,6 +304,7 @@ def find_config(
 
 
 def check_keys(commandset: dict) -> bool:
+    """Check if all values are valid PyAutGui keys."""
     all_valid = True
     for keycode in commandset.values():
         if not pyautogui.isValidKey(keycode):
@@ -334,7 +337,7 @@ def get_parser() -> argparse.ArgumentParser:
 
 
 def main():
-    """Main entry point - load config and run a bot."""
+    """Load config, assorted setup, and run a bot - main entry point."""
     parser = get_parser()
     args = parser.parse_args()
 
