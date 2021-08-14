@@ -7,8 +7,6 @@ from typing import Union
 
 import toml
 
-from twitchplays_retroarch import GITHUB_LINK, CONFIG_NAME
-
 # mapping of RetroArch code (left) to PyAutoGUI code (right)
 # https://gist.github.com/Monroe88/0f7aa02156af6ae2a0e728852dcbfc90 and experimentation for libretro codes
 # https://github.com/asweigart/pyautogui/blob/master/pyautogui/_pyautogui_win.py#L114 for PyAutoGUI codes
@@ -60,6 +58,7 @@ MAPPING = {
 }
 CFG_KEY_PATTERN = re.compile(r'input_(player[0-9]{1,2})_([a-z0-9_]+)')
 CFG_NAME = 'retroarch.cfg'
+CFG_NONE_STRING = 'nul'
 CONVERSION_DEST = 'converted-retroarch-controls.toml'
 
 
@@ -77,9 +76,10 @@ def convert_dicts(libretro_config: dict, mapping: dict) -> dict:
             key_name = key_match[2]
 
             # try to get PyAutoGUI equivalent keycode from mapping. If it's not in the mapping it should be the same
-            pyautogui_keycode = mapping.get(libretro_keycode, default=libretro_keycode)
+            pyautogui_keycode = mapping.get(libretro_keycode, libretro_keycode)
 
-            toml_config[player_id][key_name] = pyautogui_keycode
+            if pyautogui_keycode != CFG_NONE_STRING:
+                toml_config.setdefault(player_id, {})[key_name] = pyautogui_keycode
 
     return toml_config
 
@@ -103,7 +103,7 @@ def libretro_cfg_to_pyautogui_toml(in_path: Path, out_path: Path, mapping: dict 
     config_parser.read_string(in_string, source=str(in_path))
     libretro_config = config_parser[config_dummy_header]
 
-    toml_config = convert_dicts(libretro_config, mapping)
+    toml_config = convert_dicts(dict(libretro_config), mapping)
 
     with open(out_path, 'w', encoding='utf-8') as toml_file:
         toml.dump(toml_config, toml_file)
@@ -146,7 +146,10 @@ def locate_libretro_config() -> Union[Path, None]:
     return None
 
 
-def auto_conversion(cfg_location: Path = None):
+def auto_conversion(
+        cfg_location: Path = None,
+        github_link: str = 'GitHub', config_name: str = 'your config file'
+):
     """Search for and convert libretro config.
 
     Uses locate_retroarch_config if not given as argument.
@@ -165,7 +168,7 @@ def auto_conversion(cfg_location: Path = None):
             "  If you have RetroArch installed in a normal location but it couldn't be found, please get in touch. \n"
             '  (%s) \n'
             '  If you can find RetroArch/retroarch.cfg yourself, copy it into this folder, or use the -rc argument.',
-            GITHUB_LINK
+            github_link
         )
         return False
 
@@ -181,6 +184,6 @@ def auto_conversion(cfg_location: Path = None):
     else:
         log.info(
             'Successfully converted RetroArch configuration. Check %s for control scheme templates to put in %s!',
-            dest, CONFIG_NAME
+            dest, config_name
         )
         return True
