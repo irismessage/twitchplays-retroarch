@@ -60,6 +60,8 @@ CFG_KEY_PATTERN = re.compile(r'input_(player[0-9]{1,2})_([a-z0-9_]+)')
 CFG_NAME = 'retroarch.cfg'
 CFG_NONE_STRING = 'nul'
 CONVERSION_DEST = 'converted-retroarch-controls.toml'
+TOML_HEADER = '# This contains control schemes grabbed and converted from your RetroArch settings.\n' \
+              '# You can take any one of these sections, and put it in your config file as [keys].\n'
 
 
 def convert_dicts(libretro_config: dict, mapping: dict) -> dict:
@@ -78,7 +80,8 @@ def convert_dicts(libretro_config: dict, mapping: dict) -> dict:
             # try to get PyAutoGUI equivalent keycode from mapping. If it's not in the mapping it should be the same
             pyautogui_keycode = mapping.get(libretro_keycode, libretro_keycode)
 
-            if pyautogui_keycode != CFG_NONE_STRING:
+            # ignore nul values and special values, which are just digits
+            if pyautogui_keycode != CFG_NONE_STRING and not pyautogui_keycode.isdigit():
                 toml_config.setdefault(player_id, {})[key_name] = pyautogui_keycode
 
     return toml_config
@@ -105,8 +108,10 @@ def libretro_cfg_to_pyautogui_toml(in_path: Path, out_path: Path, mapping: dict 
 
     toml_config = convert_dicts(dict(libretro_config), mapping)
 
+    toml_config_string = toml.dumps(toml_config)
+    toml_config_string = TOML_HEADER + toml_config_string
     with open(out_path, 'w', encoding='utf-8') as toml_file:
-        toml.dump(toml_config, toml_file)
+        toml_file.write(toml_config_string)
 
 
 def locate_libretro_config() -> Union[Path, None]:
