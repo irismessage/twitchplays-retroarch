@@ -30,14 +30,12 @@ from twitchio.ext import commands
 
 from twitchplays_retroarch import util, controls_converter
 
+import pyautogui
 if sys.platform == 'win32':
     import pydirectinput
-else:
-    import pyautogui
 
 
 # todo: hotkey sound?
-# todo: check if keys in config are valid on startup?
 
 
 __version__ = '0.7.0'
@@ -303,6 +301,16 @@ def find_config(
     util.q(2)
 
 
+def check_keys(commandset: dict) -> bool:
+    all_valid = True
+    for keycode in commandset.values():
+        if not pyautogui.isValidKey(keycode):
+            all_valid = False
+            log.warning('Invalid key code: %s', keycode)
+
+    return all_valid
+
+
 def get_parser() -> argparse.ArgumentParser:
     """Return the ArgumentParser for this script.
 
@@ -336,6 +344,8 @@ def main():
     log.info('Loading config..')
     with open(config_path) as config_file:
         config = toml.load(config_file)
+
+    check_keys(config['keys'])
 
     bot = TwitchPlaysRetroArchBot(
         token=config['twitch']['token'],
